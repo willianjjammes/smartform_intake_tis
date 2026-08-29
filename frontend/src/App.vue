@@ -41,10 +41,12 @@ async function onSubmit(data: Record<string, unknown>) {
   if (!schemaData.value) return
   const respondentRequired = schemaData.value.respondent_required
   const respondentClean = respondent.value.trim()
+  // Guard-rail: server-side também valida, mas apanhamos aqui para UX imediata
   if (respondentRequired && !respondentClean) {
     errorMessage.value = 'O nome do respondente é obrigatório neste formulário.'
     return
   }
+  errorMessage.value = ''
   try {
     await submitForm({
       formkey,
@@ -88,13 +90,17 @@ async function onSubmit(data: Record<string, unknown>) {
     <h1 class="tis-title">{{ schemaData.title }}</h1>
     <p v-if="schemaData.subtitle" class="tis-subtitle">{{ schemaData.subtitle }}</p>
 
-    <div v-if="schemaData.respondent_required || true" class="tis-respondent">
+    <!-- Campo respondent SÓ aparece quando o schema declara respondent_required=true.
+         Se o agente MCP quiser um respondente opcional, adiciona um campo normal ao schema. -->
+    <div v-if="schemaData.respondent_required" class="tis-respondent">
       <FormKit
         v-model="respondent"
         type="text"
         name="respondent"
-        :label="schemaData.respondent_required ? 'Quem responde? *' : 'Quem responde? (opcional)'"
-        :help="schemaData.respondent_required ? 'Obrigatório para identificar a submissão.' : 'Opcional. Se preferires responder anonimamente, deixa em branco.'"
+        label="Quem responde?"
+        help="Obrigatório para identificar a submissão."
+        validation="required|length:2,200"
+        :validation-messages="{ required: 'O nome do respondente é obrigatório.', length: 'Nome entre 2 e 200 caracteres.' }"
       />
     </div>
 
