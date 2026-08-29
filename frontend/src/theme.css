@@ -1,0 +1,156 @@
+/* TIS Smart Form: Intake — tema "ops room" (partilhado com Decisions)
+   Override do genesis theme + estilos globais */
+
+:root {
+  --tis-navy: #0C1524;
+  --tis-navy-2: #1a2942;
+  --tis-paper: #F5F6F3;
+  --tis-white: #FFFFFF;
+  --tis-accent: #48BB78;
+  --tis-accent-hover: #38A063;
+  --tis-amber: #F59E0B;
+  --tis-red: #EF4444;
+  --tis-muted: #6B7280;
+  --tis-border: #E5E7EB;
+  --tis-radius: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--tis-paper);
+  color: var(--tis-navy);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+code, pre { font-family: "IBM Plex Mono", "SF Mono", Monaco, Consolas, monospace; }
+
+#app { max-width: 780px; margin: 0 auto; padding: 32px 20px 60px; }
+
+.tis-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--tis-border);
+}
+
+.tis-logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--tis-navy);
+  letter-spacing: -0.3px;
+}
+
+.tis-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: var(--tis-navy);
+  color: var(--tis-white);
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.tis-tag.tis-tag-test {
+  background: var(--tis-amber);
+}
+
+.tis-card {
+  background: var(--tis-white);
+  border-radius: var(--tis-radius);
+  padding: 32px 28px;
+  box-shadow: 0 1px 4px rgba(12, 21, 36, 0.06);
+  border: 1px solid var(--tis-border);
+}
+
+.tis-title { font-size: 26px; font-weight: 700; margin: 0 0 8px 0; color: var(--tis-navy); letter-spacing: -0.4px; }
+.tis-subtitle { color: var(--tis-muted); margin: 0 0 24px 0; font-size: 15px; }
+.tis-category { display: inline-block; font-size: 11px; padding: 3px 8px; background: rgba(72, 187, 120, 0.15); color: var(--tis-accent-hover); border-radius: 3px; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 12px; }
+
+.tis-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.tis-state h2 { font-size: 22px; margin: 12px 0; color: var(--tis-navy); }
+.tis-state p { color: var(--tis-muted); font-size: 15px; }
+.tis-state.tis-state-success h2 { color: var(--tis-accent-hover); }
+.tis-state.tis-state-error h2 { color: var(--tis-red); }
+
+.tis-loading::before { content: "…"; font-size: 32px; color: var(--tis-muted); }
+
+/* Respondente (campo custom fora do FormKitSchema) */
+.tis-respondent {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(12, 21, 36, 0.03);
+  border-radius: var(--tis-radius);
+}
+
+/* Override do genesis (formkit-outer, formkit-input, etc.) */
+.formkit-outer { margin-bottom: 20px; }
+.formkit-label {
+  display: block;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: var(--tis-navy);
+}
+.formkit-inner {
+  border: 1px solid var(--tis-border);
+  border-radius: var(--tis-radius);
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+.formkit-inner:focus-within { border-color: var(--tis-navy); box-shadow: 0 0 0 3px rgba(12, 21, 36, 0.08); }
+.formkit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--tis-navy);
+  outline: none;
+}
+.formkit-input:disabled { background: rgba(0,0,0,0.03); cursor: not-allowed; }
+.formkit-help { font-size: 12px; color: var(--tis-muted); margin-top: 4px; }
+.formkit-messages { list-style: none; padding: 0; margin: 4px 0 0 0; }
+.formkit-message { color: var(--tis-red); font-size: 12px; }
+
+/* Submit button do FormKit form */
+[data-type="submit"] .formkit-input,
+button.formkit-input[type="submit"] {
+  background: var(--tis-navy);
+  color: var(--tis-white);
+  padding: 12px 20px;
+  border-radius: var(--tis-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 120ms ease;
+}
+[data-type="submit"] .formkit-input:hover,
+button.formkit-input[type="submit"]:hover { background: var(--tis-navy-2); }
+[data-type="submit"] .formkit-input:disabled { background: var(--tis-muted); cursor: not-allowed; }
+
+/* Groups e repeaters recuados */
+[data-type="group"] > .formkit-outer > .formkit-label,
+[data-type="repeater"] > .formkit-outer > .formkit-label {
+  font-size: 16px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tis-border);
+  margin-bottom: 16px;
+}
+
+[data-type="group"] .formkit-inner,
+[data-type="repeater"] .formkit-inner {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
