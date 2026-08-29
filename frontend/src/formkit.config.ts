@@ -1,22 +1,24 @@
 // FormKit config — TIS Smart Form: Intake
 // Genesis theme + Pro plugin + pt-PT locale
-// Referências: ADR-100 (Vue+FormKit), ADR-101 (whitelist server-side)
+// v0.2 (2026-08-29): removidos autocomplete/repeater das Pro features - ADR-101 v0.2
+// bloqueia repeater e if no server; nao vale a pena imports que nao usamos.
+// Referências: ADR-100 (Vue+FormKit), ADR-101 v0.2 (whitelist server-side)
 
 import { pt } from '@formkit/i18n'
 import { generateClasses } from '@formkit/themes'
 import { genesisIcons } from '@formkit/icons'
-import { createProPlugin, autocomplete, colorpicker, datepicker, dropdown, mask, rating, repeater, slider, taglist, toggle, transferlist } from '@formkit/pro'
+import { createProPlugin, datepicker, dropdown, mask, rating, slider, taglist, toggle, transferlist } from '@formkit/pro'
 import type { DefaultConfigOptions } from '@formkit/vue'
 
 // Pro key emitida pelo dashboard FormKit
+// NOTA: com CSP restritiva + apenas Pro (sem Enterprise), repeater e `if` sao desactivados
+// pelo FormKit (mostra warning "Enterprise license required for restrictive CSP").
+// Whitelist server-side (ADR-101 v0.2) rejeita ambos preventivamente.
 const proPlugin = createProPlugin('fk-6774fdff0c', {
-  autocomplete,
-  colorpicker,
   datepicker,
   dropdown,
   mask,
   rating,
-  repeater,
   slider,
   taglist,
   toggle,
