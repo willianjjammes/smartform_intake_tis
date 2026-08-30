@@ -73,3 +73,50 @@ DDL em `supabase/schema.sql`.
 ---
 
 **Última revisão:** 2026-08-26 (v0.1)
+
+---
+
+## Apêndice A — Sprint 0 execution notes (2026-08-30)
+
+### A.1 MCP contract em produção (7 tools)
+
+O router `[POC] SmartForm Intake` regista 7 tools MCP (não 6 como o SPEC original antevia). Adicionada `list_intake_forms` como resposta directa à paridade com o MCP Docs:
+
+```
+list_intake_forms(limit?, offset?, category?, is_test?, created_by?, created_after?, include_stats?)
+  → { ok, total_matching, returned, limit, offset, include_stats,
+      forms: [ { id, session_id, title, subtitle, category, schema_version,
+                 is_test, respondent_required, created_by, created_at, url,
+                 submissions_count?, last_submission_at? } ] }
+```
+
+Filtros são combinados em query PostgREST via `filterType: 'string'` no node Supabase v1 (mesmo padrão do worker Docs equivalente). Ordenação fixa: `created_at.desc`. Paginação client-side na resposta (SELECT interno cap 100 rows).
+
+### A.2 Reconciliação com CA-05 e CA-06
+
+`repeater` e `if` conditional foram rejeitados 422 no Sprint 0 (whitelist ADR-101 v0.2). CA-05 e CA-06 do §5 são adiados para v0.2 se FormKit Enterprise for adquirido. Em Sprint 0 valida-se **os rejeitos**, não a funcionalidade:
+
+| # | Critério original | Estado Sprint 0 |
+|---|---|---|
+| CA-05 | `if: $get(entidade.tipo).value === PJ` funciona | ❌ substituído: schema com `if` → 422 |
+| CA-06 | Repeater `min:1 max:5` funciona | ❌ substituído: schema com `$formkit: repeater` → 422 |
+
+### A.3 Frontend — arquitectura efectiva
+
+- **`src/App.vue`** — state machine 4 estados (loading/ready/submitted/error), fetch on mount via `?formkey=<uuid>` da querystring, submit via `<FormKit type="form">` que embrulha `<FormKitSchema :schema="schemaFields">`.
+- **`src/api.ts`** — 2 funções: `fetchSchema(formkey)` (GET) e `submitForm(payload)` (POST). Base URL hardcoded para `https://willianjammes.app.n8n.cloud`.
+- **`src/formkit.config.ts`** — Genesis theme, `pt` locale, Pro plugin (`datepicker`, `dropdown`, `mask`, `rating`, `slider`, `taglist`, `toggle`, `transferlist`). **Não** importa `repeater` nem `autocomplete` — coerente com whitelist ADR-101 v0.2.
+- **`buildMetadata()`** — anexa `user_agent`, `language`, `screen`, `referrer`, `submitted_from: intake.tisapp.ai` a cada submissão.
+
+### A.4 Deploy pipeline efectivo
+
+`deploy.sh` (repo root):
+1. Verifica branch = `main`, avisa sobre mudanças não-committadas fora de `dist/`
+2. `npm run build` no `frontend/`
+3. Commit `frontend/dist` (se mudou) + push
+4. SSH `vps-intake` → `git pull --ff-only` em `/docker/smartform_intake_tis` + `docker restart forms-intake`
+5. Health check `curl -I https://intake.tisapp.ai/` esperando 200
+
+### A.5 Skill Cowork associada
+
+`smartintake` publicada (fonte: `skills/smartintake/SKILL.md`). Cobre as 7 tools MCP + decision framework vs `formmcp` e `smartdocs`. Documenta workarounds para `repeater`/`if` e diferenças críticas (defaults, semântica de submissão).

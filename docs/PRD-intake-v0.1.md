@@ -521,3 +521,54 @@ Próximo número livre: **ADR-105**.
 - Schema exemplo cobrindo group + repeater + conditional + validation
 - Modelo de dados definido (`intake_forms`, `intake_submissions`)
 - Roadmap Sprint 0 mapeado
+
+---
+
+## 17. Sprint 0 — Estado de execução (2026-08-30)
+
+Este apêndice reflecte o estado real da implementação após a execução do Sprint 0 e captura deltas menores vs o PRD original.
+
+### 17.1 Blocos executados
+
+| Bloco | Estado | Notas |
+|---|---|---|
+| A. Postgres schema (`intake_forms`, `intake_submissions`) | ✅ done | DDL em `supabase/schema.sql` — sem `UNIQUE(session_id, respondent)`, como decidido em ADR-102 |
+| B. MCP router + 6 workers iniciais | ✅ done | Workflow `[POC] SmartForm Intake` (`gsBJJtkP6EYWhWMY`), mcpTrigger v2 + bearerAuth em `/mcp-intake` |
+| C. 2 webhooks públicos (schema + submit) | ✅ done | `GET /webhook/intake-schema?formkey=<uuid>` e `POST /webhook/intake-submit`, ambos com CORS aberto |
+| D. Frontend Vue+FormKit+Vite | ✅ done (scaffold + fluxo) | `frontend/src/App.vue` com estados loading/ready/submitted/error; `api.ts` com fetchSchema/submitForm; `formkit.config.ts` com Genesis + Pro + pt-PT |
+| E. Deploy pipeline | ✅ done (script) | `deploy.sh` faz build + git commit dist + push + ssh vps-intake git pull + health check em `https://intake.tisapp.ai/` |
+| F. Teste E2E | 🟡 pendente | Criar cadastro fornecedor real via MCP → abrir link → preencher → SELECT em `intake_submissions` |
+| G. **Add-on 2026-08-30 — `list_intake_forms`** | ✅ done | 7ª tool MCP registada + skill Cowork `smartintake` publicada |
+
+### 17.2 MCP tools em produção (7 tools)
+
+Actualização do §5.1 do PRD: o Sprint 0 tem 7 tools (não 6), com 3 delas como skeletons a devolver 501 até Sprint 1.
+
+| # | Tool | Estado Sprint 0 | Worker workflow ID |
+|---|---|---|---|
+| 1 | `ping` | real | `9bgwqgW96824keFW` |
+| 2 | `get_intake_example` | real | `drUbrHr40bv5Dswf` |
+| 3 | `create_intake_form` | real | `W4CbyW3turAzisBa` |
+| 4 | `get_intake_form` | **skeleton 501** | `mvglJBOkVkBcFlVO` |
+| 5 | `get_intake_status` | **skeleton 501** | `lGpq5FlLg0jFUqI2` |
+| 6 | `get_intake_submissions` | **skeleton 501** | `BbcIabaBhdD3k8vV` |
+| 7 | `list_intake_forms` | **real (novo)** | `5Igh2LQpyHA5f1GO` |
+
+Impl. real dos skeletons e do CA-09 fica agendada para Sprint 1.
+
+### 17.3 Skill Cowork associada
+
+- **`smartintake`** (publicada 2026-08-30) — ensina o Claude Cowork a operar as 7 tools com decision framework claro vs `formmcp` (Decisions) e `smartdocs` (Docs). Fonte de verdade: `skills/smartintake/SKILL.md`.
+
+### 17.4 Deltas vs PRD original
+
+1. **`repeater` e `if` conditional rejeitados em Sprint 0** — descoberta empírica confirmou que ambos requerem FormKit Enterprise, não Pro. Whitelist ADR-101 v0.2 formaliza esta restrição server-side com resposta 422. CA-05 e CA-06 do §5 do SPEC passam a exigir workarounds documentados (campos numerados fixos, formulários encadeados) — **não a funcionalidade original**. Reagendados para v0.2 se a licença Enterprise for adquirida.
+2. **`list_intake_forms` não estava no PRD** — adicionada como resposta directa à necessidade de discovery ("quais formulários criei?") vinda da paridade com o MCP Docs. Filtra por `category`, `is_test`, `created_by`, `created_after`; pagina com `limit`/`offset`; `include_stats: true` agrega contagem de submissões.
+3. **Frontend usa TypeScript strict + vue-tsc** — não referenciado no PRD; ficou como escolha da execução para maximizar refactor safety.
+
+### 17.5 Endpoints públicos (produção)
+
+- **MCP**: `https://willianjammes.app.n8n.cloud/mcp/mcp-intake` (bearerAuth)
+- **Schema fetch** (frontend → n8n): `GET https://willianjammes.app.n8n.cloud/webhook/intake-schema?formkey=<uuid>`
+- **Submit** (frontend → n8n): `POST https://willianjammes.app.n8n.cloud/webhook/intake-submit`
+- **Frontend**: `https://intake.tisapp.ai/?formkey=<uuid>`
