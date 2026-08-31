@@ -40,6 +40,14 @@ code, pre { font-family: "IBM Plex Mono", "SF Mono", Monaco, Consolas, monospace
   border-bottom: 1px solid var(--tis-border);
 }
 
+.tis-brand svg {
+  width: 96px;
+  height: auto;
+  display: block;
+}
+@media (min-width: 640px) {
+  .tis-brand svg { width: 108px; }
+}
 .tis-logo {
   font-weight: 700;
   font-size: 18px;

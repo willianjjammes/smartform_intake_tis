@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { FormKitSchema } from '@formkit/vue'
 import { buildMetadata, fetchSchema, submitForm, type IntakeSchemaResponse } from './api'
+// Logo TIS oficial inline (SVG ?raw) — mesmo asset/abordagem do Decisions: sem fetch externo, CSP-safe
+import tisLogo from './assets/tis-logo.svg?raw'
 
 type ViewState = 'loading' | 'ready' | 'submitted' | 'error'
 
@@ -65,7 +67,7 @@ async function onSubmit(data: Record<string, unknown>) {
 
 <template>
   <div class="tis-header">
-    <span class="tis-logo">TIS Smart Form</span>
+    <span class="tis-brand" role="img" aria-label="TIS" v-html="tisLogo"></span>
     <span v-if="schemaData?.is_test" class="tis-tag tis-tag-test">TESTE</span>
     <span v-else class="tis-tag">INTAKE</span>
   </div>
