@@ -63,11 +63,12 @@ psql "$SUPABASE_URL" -f supabase/schema.sql
 - [x] Workflow `[POC] SmartForm Intake` criado com 7 tools MCP
 - [x] 7 workers MCP + 2 workers webhook
 - [x] Skill Cowork `smartintake` publicada
-- [ ] Frontend Vite+Vue+FormKit
-- [ ] Deploy em `intake.tisapp.ai`
-- [ ] Confirmar/emendar CSP para FormKit styles
-- [ ] Teste E2E: criar cadastro fornecedor → preencher → ler
+- [x] Frontend Vite+Vue+FormKit (live; logo TIS oficial no header desde 2026-08-31 — SVG `src/assets/tis-logo.svg` via `?raw`, padrão da família)
+- [x] Deploy em `intake.tisapp.ai` (`./deploy.sh`: build → commit dist → push → VPS git pull)
+- [x] CSP confirmada para FormKit styles
+- [x] Teste E2E: criar cadastro fornecedor → preencher → ler
 - [ ] Implementação real dos 3 skeletons (`get_intake_form`, `get_intake_status`, `get_intake_submissions`) — Sprint 1
+- [ ] Cache headers nginx no `forms-intake` (HTML no-cache + `/assets/` immutable, padrão Docs/Voice) — Sprint 1
 
 ## Numeração de ADR
 
