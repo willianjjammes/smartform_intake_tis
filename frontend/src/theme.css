@@ -162,3 +162,204 @@ button.formkit-input[type="submit"]:hover { background: var(--tis-navy-2); }
   border: 0;
   box-shadow: none;
 }
+
+/* ============================================================
+   S-1.5 — Wizard por tabs + guardar-e-retomar
+   ============================================================ */
+
+.tis-draft-notice {
+  background: rgba(72, 187, 120, 0.1);
+  border: 1px solid rgba(72, 187, 120, 0.35);
+  color: var(--tis-accent-hover);
+  border-radius: var(--tis-radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+/* Tabs das secções */
+.tis-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.tis-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 200px;
+  padding: 7px 12px 7px 8px;
+  border: 1px solid var(--tis-border);
+  border-radius: 999px;
+  background: var(--tis-white);
+  color: var(--tis-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.tis-tab:hover { border-color: var(--tis-navy); color: var(--tis-navy); }
+
+.tis-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tis-tab-num {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(12, 21, 36, 0.08);
+  color: var(--tis-navy);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* estados */
+.tis-tab-complete .tis-tab-num { background: var(--tis-accent); color: var(--tis-white); }
+.tis-tab-complete { color: var(--tis-navy); }
+.tis-tab-incomplete .tis-tab-num { background: rgba(245, 158, 11, 0.2); color: #B45309; }
+.tis-tab-active {
+  border-color: var(--tis-navy);
+  background: var(--tis-navy);
+  color: var(--tis-white);
+}
+.tis-tab-active:hover { color: var(--tis-white); }
+.tis-tab-active .tis-tab-num { background: rgba(255, 255, 255, 0.2); color: var(--tis-white); }
+.tis-tab-active.tis-tab-complete .tis-tab-num { background: var(--tis-accent); }
+
+/* Progresso */
+.tis-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tis-progress-text { flex: none; font-size: 12px; color: var(--tis-muted); font-weight: 600; letter-spacing: 0.2px; }
+
+.tis-progress-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--tis-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tis-progress-fill {
+  height: 100%;
+  background: var(--tis-accent);
+  border-radius: 999px;
+  transition: width 220ms ease;
+}
+
+/* Footer do wizard (Anterior / Seguinte / Enviar) */
+.tis-wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--tis-border);
+}
+
+.tis-btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 18px;
+  border-radius: var(--tis-radius);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.tis-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.tis-btn-primary {
+  background: var(--tis-navy);
+  border: 1px solid var(--tis-navy);
+  color: var(--tis-white);
+}
+.tis-btn-primary:hover:not(:disabled) { background: var(--tis-navy-2); }
+
+.tis-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--tis-border);
+  color: var(--tis-navy);
+}
+.tis-btn-ghost:hover:not(:disabled) { border-color: var(--tis-navy); }
+
+/* Mensagem de pendências no submit final */
+.tis-pending {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--tis-radius);
+  color: #92400E;
+  font-size: 13px;
+}
+
+/* Barra de guardar rascunho */
+.tis-savebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--tis-border);
+}
+
+.tis-save-later {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tis-muted);
+  background: transparent;
+  border: 1px solid var(--tis-border);
+  border-radius: var(--tis-radius);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tis-save-later:hover { color: var(--tis-navy); border-color: var(--tis-navy); }
+
+.tis-save-status { font-size: 12px; color: var(--tis-muted); }
+.tis-save-status.tis-save-error { color: var(--tis-red); }
+
+/* Painel do link de retoma */
+.tis-resume-panel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: rgba(12, 21, 36, 0.03);
+  border-radius: var(--tis-radius);
+}
+.tis-resume-panel p { margin: 0 0 10px 0; font-size: 13px; color: var(--tis-muted); }
+
+.tis-resume-row { display: flex; gap: 8px; }
+
+.tis-resume-input {
+  flex: 1;
+  min-width: 0;
+  font-family: "IBM Plex Mono", "SF Mono", Monaco, Consolas, monospace;
+  font-size: 12px;
+  padding: 9px 10px;
+  border: 1px solid var(--tis-border);
+  border-radius: var(--tis-radius);
+  color: var(--tis-navy);
+  background: var(--tis-white);
+}
+
+@media (max-width: 560px) {
+  .tis-tab { max-width: 100%; }
+  .tis-resume-row { flex-direction: column; }
+}
