@@ -159,6 +159,14 @@ function flushSave(keepalive = false) {
 // ao servidor fora de ordem e o payload antigo sobrepor o novo (bug apanhado em teste 05/09).
 let saveInFlight: Promise<void> | null = null
 
+// Só guardamos depois de interacção REAL do utilizador (evento input/change genuíno).
+// Sem isto, o FormKit inicializa selects/radios com defaults, o watcher dispara e o
+// autosave criava um draft por cada mero visitante (apanhado em teste 05/09).
+let userInteracted = false
+function markInteracted() {
+  userInteracted = true
+}
+
 async function doSave(keepalive = false): Promise<boolean> {
   // espera por qualquer save em curso — depois re-avalia com o snapshot ACTUAL
   while (saveInFlight) {
@@ -169,6 +177,7 @@ async function doSave(keepalive = false): Promise<boolean> {
     }
   }
   if (state.value !== 'ready' || !schemaData.value) return false
+  if (!userInteracted && !resumeToken.value) return false
   if (!hasAnyContent()) return false
   const snap = snapshot()
   if (snap === lastSavedJson) return true
@@ -227,6 +236,7 @@ async function onSaveForLater() {
     return
   }
   errorMessage.value = ''
+  userInteracted = true // clicar em «Guardar» É interacção
   const ok = await doSave()
   if (ok) showResumePanel.value = true
   else errorMessage.value = 'Não foi possível guardar o rascunho. Volta a tentar em segundos.'
@@ -257,6 +267,9 @@ function onVisibilityChange() {
 
 onMounted(async () => {
   document.addEventListener('visibilitychange', onVisibilityChange)
+  // eventos genuínos de teclado/rato — o FormKit a inicializar defaults NÃO dispara estes
+  document.addEventListener('input', markInteracted, true)
+  document.addEventListener('change', markInteracted, true)
   if (!formkey) {
     state.value = 'error'
     errorMessage.value = 'Falta o parâmetro formkey no URL. Este link parece incompleto.'
@@ -312,7 +325,11 @@ onMounted(async () => {
   }
 })
 
-onBeforeUnmount(() => document.removeEventListener('visibilitychange', onVisibilityChange))
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+  document.removeEventListener('input', markInteracted, true)
+  document.removeEventListener('change', markInteracted, true)
+})
 
 // --- submissão final: validação bloqueante só aqui (navegação é sempre livre) ---
 function triggerSubmit() {
