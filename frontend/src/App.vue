@@ -154,7 +154,20 @@ function flushSave(keepalive = false) {
   void doSave(keepalive)
 }
 
+// Saves são SERIALIZADOS: um POST de cada vez, sempre com o modelo mais recente.
+// Sem isto, dois flushes rápidos (ex.: duas mudanças de tab seguidas) podem chegar
+// ao servidor fora de ordem e o payload antigo sobrepor o novo (bug apanhado em teste 05/09).
+let saveInFlight: Promise<void> | null = null
+
 async function doSave(keepalive = false): Promise<boolean> {
+  // espera por qualquer save em curso — depois re-avalia com o snapshot ACTUAL
+  while (saveInFlight) {
+    try {
+      await saveInFlight
+    } catch {
+      /* o erro já foi tratado por quem lançou */
+    }
+  }
   if (state.value !== 'ready' || !schemaData.value) return false
   if (!hasAnyContent()) return false
   const snap = snapshot()
@@ -164,17 +177,22 @@ async function doSave(keepalive = false): Promise<boolean> {
     syncUrlToken()
   }
   saveState.value = 'saving'
+  const post = saveDraft(
+    {
+      formkey,
+      resume_token: resumeToken.value,
+      form_data: formModel.value,
+      respondent: respondent.value.trim() || null,
+      current_step: wizardGroups.value[activeStep.value]?.name ?? null,
+    },
+    keepalive
+  )
+  saveInFlight = post.then(
+    () => undefined,
+    () => undefined
+  )
   try {
-    await saveDraft(
-      {
-        formkey,
-        resume_token: resumeToken.value,
-        form_data: formModel.value,
-        respondent: respondent.value.trim() || null,
-        current_step: wizardGroups.value[activeStep.value]?.name ?? null,
-      },
-      keepalive
-    )
+    await post
     lastSavedJson = snap
     lastSavedAt.value = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
     saveState.value = 'saved'
@@ -182,6 +200,8 @@ async function doSave(keepalive = false): Promise<boolean> {
   } catch {
     saveState.value = 'error'
     return false
+  } finally {
+    saveInFlight = null
   }
 }
 
