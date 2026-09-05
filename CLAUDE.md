@@ -6,7 +6,7 @@ Subproduto da família **TIS Smart Form**. Ver [`PLATFORM-CLAUDE.md`](https://gi
 
 Formulários de **recolha complexa de informação** com validação rica, condicionais, repeaters. Optimizado para cadastros, onboarding, discovery técnico denso.
 
-**Estado:** Sprint 0 iniciado 2026-08-26. Docs prontos, MCP com 7 tools registadas em produção (6 originais + `list_intake_forms` add-on 2026-08-30). Frontend por arrancar.
+**Estado:** Sprint 0 fechado; **S-1 e S-1.5 fechados 2026-09-05**. MCP com 7 tools reais em produção. Frontend live com **wizard por tabs + guardar-e-retomar** (drafts com `resume_token`).
 
 ## Ordem de leitura
 
@@ -35,14 +35,22 @@ Router `[POC] SmartForm Intake` (workflow n8n `gsBJJtkP6EYWhWMY`), 7 tools regis
 | 1 | `ping` | `9bgwqgW96824keFW` | real |
 | 2 | `get_intake_example` | `drUbrHr40bv5Dswf` | real |
 | 3 | `create_intake_form` | `W4CbyW3turAzisBa` | real |
-| 4 | `get_intake_form` | `mvglJBOkVkBcFlVO` | Sprint 0 skeleton (501) |
-| 5 | `get_intake_status` | `lGpq5FlLg0jFUqI2` | Sprint 0 skeleton (501) |
-| 6 | `get_intake_submissions` | `BbcIabaBhdD3k8vV` | Sprint 0 skeleton (501) |
+| 4 | `get_intake_form` | `mvglJBOkVkBcFlVO` | real (S-1: já estava implementada; descrição stale «501» corrigida 2026-09-05) |
+| 5 | `get_intake_status` | `lGpq5FlLg0jFUqI2` | real (idem) |
+| 6 | `get_intake_submissions` | `BbcIabaBhdD3k8vV` | real (idem) |
 | 7 | `list_intake_forms` | `5Igh2LQpyHA5f1GO` | **real (add-on 2026-08-30)** |
 
-Adicionalmente, 2 webhooks públicos (não são tools MCP):
+Adicionalmente, 3 workers webhook públicos (não são tools MCP):
 - `GET /webhook/intake-schema?formkey=<uuid>` (worker `lL5jCLL9ziu6gXWT`) — devolve schema para o frontend renderizar
 - `POST /webhook/intake-submit` (worker `Sht2ODdZwsddIfG4`) — recebe submissões do frontend
+- `POST|GET /webhook/intake-draft` (worker `pm6MrCbmEt7Q1QfL`, S-1.5) — POST faz upsert do rascunho por `resume_token` (aceita `consumed:true` no submit); GET `?r=<token>` hidrata. Tabela `intake_drafts` (purga 30d; draft NUNCA conta como submissão)
+
+## Wizard + guardar-e-retomar (S-1.5, 2026-09-05)
+
+- `form_config.layout: wizard|single|auto` (por omissão `auto`: >1 grupo E >15 campos → wizard; um passo por grupo top-level)
+- Tabs com estado (✓ completa / âmbar incompleta / neutra por visitar), progresso «Secção X de N», **navegação livre** — validação bloqueante só no submit final, que lista as secções pendentes e salta para a primeira
+- Autosave debounced 12s + flush ao mudar de tab e ao esconder a página; botão «Guardar e continuar depois» mostra link de retoma `?formkey=…&r=<resume_token>` (token de 32 chars gerado no cliente)
+- Após submit ok o rascunho é marcado `consumed` — reabrir o link avisa e começa do zero
 
 ## Skill Cowork associada
 
@@ -67,8 +75,9 @@ psql "$SUPABASE_URL" -f supabase/schema.sql
 - [x] Deploy em `intake.tisapp.ai` (`./deploy.sh`: build → commit dist → push → VPS git pull)
 - [x] CSP confirmada para FormKit styles
 - [x] Teste E2E: criar cadastro fornecedor → preencher → ler
-- [ ] Implementação real dos 3 skeletons (`get_intake_form`, `get_intake_status`, `get_intake_submissions`) — Sprint 1
-- [ ] Cache headers nginx no `forms-intake` (HTML no-cache + `/assets/` immutable, padrão Docs/Voice) — Sprint 1
+- [x] S-1 (2026-09-05): as 3 tools de leitura **já estavam implementadas** — corrigidas apenas as descrições stale «SKELETON 501» no router + publicado
+- [x] S-1 (2026-09-05): cache headers nginx no `forms-intake` (`/docker/forms-intake/default.conf` montado no compose; HTML no-cache + `/assets/` immutable, padrão Docs/Voice)
+- [x] S-1.5 (2026-09-05): tabela `intake_drafts` + worker `[WORKER] Intake Webhook Draft` + wizard/autosave/retoma no frontend; E2E verificado no formulário AEBRAN (só drafts, limpos no fim)
 
 ## Numeração de ADR
 
